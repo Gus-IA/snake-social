@@ -1,12 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from "react";
+import Header from "@/components/Header";
+import SnakeGame from "@/components/SnakeGame";
+import Leaderboard from "@/components/Leaderboard";
+import WatchMode from "@/components/WatchMode";
+import { Button } from "@/components/ui/button";
 
-const Index = () => {
+type Tab = "play" | "leaderboard" | "watch";
+
+const Index: React.FC = () => {
+  const [tab, setTab] = useState<Tab>("play");
+
+  const tabs: { id: Tab; label: string; icon: string }[] = [
+    { id: "play", label: "PLAY", icon: "🎮" },
+    { id: "leaderboard", label: "RANKS", icon: "🏆" },
+    { id: "watch", label: "WATCH", icon: "👁" },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+
+      {/* Tab navigation */}
+      <nav className="flex justify-center gap-2 py-4">
+        {tabs.map((t) => (
+          <Button
+            key={t.id}
+            variant={tab === t.id ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTab(t.id)}
+            className="font-pixel text-[10px]"
+          >
+            {t.icon} {t.label}
+          </Button>
+        ))}
+      </nav>
+
+      {/* Content */}
+      <main className="flex-1 flex justify-center px-4 pb-8">
+        {tab === "play" && <SnakeGame />}
+        {tab === "leaderboard" && <Leaderboard />}
+        {tab === "watch" && <WatchMode />}
+      </main>
     </div>
   );
 };
