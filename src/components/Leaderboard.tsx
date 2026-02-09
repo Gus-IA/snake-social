@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { api, type LeaderboardEntry, type GameMode } from "@/services/api";
-import { Button } from "@/components/ui/button";
 
 const Leaderboard: React.FC = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -15,51 +14,80 @@ const Leaderboard: React.FC = () => {
       .finally(() => setLoading(false));
   }, [filter]);
 
-  return (
-    <div className="w-full max-w-md">
-      <h2 className="font-pixel text-sm text-secondary cyan-text mb-4 text-center">
-        🏆 LEADERBOARD
-      </h2>
+  const filters = [
+    { id: "all" as const, label: "All Modes", icon: "⚡" },
+    { id: "walls" as const, label: "Walls", icon: "🧱" },
+    { id: "pass-through" as const, label: "Pass-Through", icon: "🌀" },
+  ];
 
-      <div className="flex justify-center gap-2 mb-4">
-        {(["all", "walls", "pass-through"] as const).map((m) => (
-          <Button
-            key={m}
-            variant={filter === m ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(m)}
-            className="font-pixel text-[9px]"
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="text-center mb-8">
+        <div className="text-4xl mb-2">🏆</div>
+        <h2 className="font-pixel text-lg sm:text-xl text-secondary cyan-text">
+          LEADERBOARD
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">Top players across all time</p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex justify-center gap-2 mb-6">
+        {filters.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-mono transition-all duration-200
+              ${filter === f.id
+                ? "bg-primary/10 border border-primary text-primary neon-border"
+                : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+              }
+            `}
           >
-            {m === "all" ? "ALL" : m === "walls" ? "🧱" : "🌀"} {m.toUpperCase()}
-          </Button>
+            <span className="mr-1.5">{f.icon}</span>
+            {f.label}
+          </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="text-center text-muted-foreground text-sm">Loading...</p>
+        <p className="text-center text-muted-foreground text-sm py-12">Loading...</p>
       ) : (
-        <div className="border border-border rounded-md overflow-hidden">
-          <table className="w-full text-xs" data-testid="leaderboard-table">
+        <div className="border border-border rounded-xl overflow-hidden bg-card/30">
+          <table className="w-full text-sm" data-testid="leaderboard-table">
             <thead>
-              <tr className="bg-muted text-muted-foreground">
-                <th className="p-2 text-left">#</th>
-                <th className="p-2 text-left">Player</th>
-                <th className="p-2 text-right">Score</th>
-                <th className="p-2 text-right">Mode</th>
+              <tr className="bg-muted/50 text-muted-foreground text-xs uppercase tracking-wider">
+                <th className="px-4 py-3 text-left w-16">Rank</th>
+                <th className="px-4 py-3 text-left">Player</th>
+                <th className="px-4 py-3 text-right">Score</th>
+                <th className="px-4 py-3 text-right">Mode</th>
+                <th className="px-4 py-3 text-right hidden sm:table-cell">Date</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((e, i) => (
                 <tr
                   key={e.id}
-                  className={`border-t border-border ${i < 3 ? "text-primary" : "text-foreground"}`}
+                  className={`
+                    border-t border-border/50 transition-colors hover:bg-muted/20
+                    ${i < 3 ? "text-primary" : "text-foreground"}
+                  `}
                 >
-                  <td className="p-2 font-pixel text-[10px]">
-                    {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
+                  <td className="px-4 py-3.5 font-pixel text-sm">
+                    {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                   </td>
-                  <td className="p-2">{e.username}</td>
-                  <td className="p-2 text-right font-mono">{e.score}</td>
-                  <td className="p-2 text-right">{e.mode === "walls" ? "🧱" : "🌀"}</td>
+                  <td className="px-4 py-3.5 font-mono font-medium">{e.username}</td>
+                  <td className="px-4 py-3.5 text-right font-mono tabular-nums font-semibold">
+                    {e.score.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border border-border bg-muted/30">
+                      {e.mode === "walls" ? "🧱" : "🌀"} {e.mode}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-right text-muted-foreground text-xs hidden sm:table-cell">
+                    {e.date}
+                  </td>
                 </tr>
               ))}
             </tbody>

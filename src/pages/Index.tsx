@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import SnakeGame from "@/components/SnakeGame";
 import Leaderboard from "@/components/Leaderboard";
 import WatchMode from "@/components/WatchMode";
-import { Button } from "@/components/ui/button";
 
 type Tab = "play" | "leaderboard" | "watch";
 
@@ -21,25 +20,36 @@ const Index: React.FC = () => {
       <Header />
 
       {/* Tab navigation */}
-      <nav className="flex justify-center gap-2 py-4">
+      <nav className="flex justify-center gap-1 py-5 px-4">
         {tabs.map((t) => (
-          <Button
+          <button
             key={t.id}
-            variant={tab === t.id ? "default" : "outline"}
-            size="sm"
             onClick={() => setTab(t.id)}
-            className="font-pixel text-[10px]"
+            className={`
+              relative px-6 py-3 font-pixel text-xs sm:text-sm tracking-wider transition-all duration-200
+              ${tab === t.id
+                ? "text-primary neon-text border-b-2 border-primary"
+                : "text-muted-foreground hover:text-foreground border-b-2 border-transparent"
+              }
+            `}
           >
-            {t.icon} {t.label}
-          </Button>
+            <span className="mr-2">{t.icon}</span>
+            {t.label}
+          </button>
         ))}
       </nav>
 
+      <div className="w-full max-w-5xl mx-auto px-4">
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
+
       {/* Content */}
-      <main className="flex-1 flex justify-center px-4 pb-8">
-        {tab === "play" && <SnakeGame />}
-        {tab === "leaderboard" && <Leaderboard />}
-        {tab === "watch" && <WatchMode />}
+      <main className="flex-1 flex justify-center px-4 py-8">
+        <div className="w-full max-w-5xl">
+          {tab === "play" && <SnakeGame />}
+          {tab === "leaderboard" && <Leaderboard />}
+          {tab === "watch" && <WatchMode />}
+        </div>
       </main>
     </div>
   );

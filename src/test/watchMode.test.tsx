@@ -6,7 +6,7 @@ describe("WatchMode", () => {
   it("renders title after loading", async () => {
     render(<WatchMode />);
     await waitFor(() => {
-      expect(screen.getByText("👁 WATCH LIVE")).toBeInTheDocument();
+      expect(screen.getByText("WATCH LIVE")).toBeInTheDocument();
     });
   });
 
