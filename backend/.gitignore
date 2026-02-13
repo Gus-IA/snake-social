@@ -49,3 +49,8 @@ dmypy.json
 
 # Ruff
 .ruff_cache/
+
+# Database
+*.db
+*.sqlite3
+.env

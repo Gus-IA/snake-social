@@ -1,41 +1,50 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
 from ..models import User, UserLogin, UserCreate
-from ..database import get_user_by_email, create_user, next_user_id
+from ..database import get_db
+from .. import crud
+import uuid
 
 router = APIRouter()
 
 @router.post("/login", response_model=User)
-async def login(credentials: UserLogin):
-    entry = get_user_by_email(credentials.email)
-    if not entry or entry["password"] != credentials.password:
+async def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, credentials.email)
+    if not db_user or not crud.verify_password(credentials.password, db_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
         )
-    return entry["user"]
+    return User(
+        id=db_user.id,
+        username=db_user.username,
+        email=db_user.email
+    )
 
 @router.post("/signup", response_model=User, status_code=status.HTTP_201_CREATED)
-async def signup(user_in: UserCreate):
-    if get_user_by_email(user_in.email):
+async def signup(user_in: UserCreate, db: Session = Depends(get_db)):
+    if crud.get_user_by_email(db, user_in.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
         )
     
-    # Simple ID generation for mock
-    new_id = str(len(get_user_by_email("demo@snake.io") or []) + 100 + 1) # This is a bit hacky, let's fix
-    # Actually database.py has next_user_id but it is not exported well for modification
-    # Let's just use UUID or random for now, or timestamp
-    import time
-    new_id = str(int(time.time()))
-
-    new_user = User(
-        id=new_id,
+    # Generate UUID for new user
+    new_id = str(uuid.uuid4())
+    
+    db_user = crud.create_user(
+        db=db,
+        user_id=new_id,
+        email=user_in.email,
         username=user_in.username,
-        email=user_in.email
+        password=user_in.password
     )
-    create_user(new_user, user_in.password)
-    return new_user
+    
+    return User(
+        id=db_user.id,
+        username=db_user.username,
+        email=db_user.email
+    )
 
 @router.post("/logout")
 async def logout():
