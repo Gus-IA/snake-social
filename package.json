@@ -1,0 +1,13 @@
+{
+  "name": "snake-social",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c cyan,green \"cd backend && make dev\" \"cd frontend && npm run dev\"",
+    "dev:backend": "cd backend && make dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

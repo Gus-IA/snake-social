@@ -1,7 +1,26 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import React, { useEffect } from "react";
+
+// Mock API
+const mockUser = { id: "1", username: "SnakeMaster", email: "demo@snake.io" };
+
+vi.mock("@/services/api", () => ({
+  api: {
+    login: vi.fn(async (email, password) => {
+      if (email === "demo@snake.io" && password === "demo123") {
+        return mockUser;
+      }
+      throw new Error("Invalid email or password");
+    }),
+    signup: vi.fn(async (email, password, username) => {
+       if (email === "demo@snake.io") throw new Error("Email already registered");
+       return { id: "2", username, email };
+    }),
+    logout: vi.fn(async () => {}),
+  },
+}));
 
 // Helper component to test auth context
 const TestConsumer: React.FC<{ action?: string }> = ({ action }) => {
