@@ -1,11 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import auth, leaderboard, game
+from .database import init_db
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize database
+    init_db()
+    yield
 
 app = FastAPI(
     title="Snake Social API",
     description="Backend API for the Snake Social application",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Configure CORS

@@ -28,19 +28,26 @@ async def get_leaderboard_entries(
 
 @router.post("", response_model=LeaderboardEntry, status_code=201)
 async def submit_score(score_in: ScoreSubmit, db: Session = Depends(get_db)):
+    print(f"📥 Received score submission: {score_in.model_dump()}")
     entry_id = str(uuid.uuid4())
-    db_entry = crud.add_score(
-        db=db,
-        entry_id=entry_id,
-        username=score_in.username,
-        score=score_in.score,
-        mode=score_in.mode,
-        entry_date=date.today()
-    )
-    return LeaderboardEntry(
-        id=db_entry.id,
-        username=db_entry.username,
-        score=db_entry.score,
-        mode=GameMode(db_entry.mode.value),
-        date=db_entry.date
-    )
+    try:
+        db_entry = crud.add_score(
+            db=db,
+            entry_id=entry_id,
+            username=score_in.username,
+            score=score_in.score,
+            mode=score_in.mode,
+            entry_date=date.today()
+        )
+        print(f"✅ Score saved successfully: {db_entry.id}")
+        return LeaderboardEntry(
+            id=db_entry.id,
+            username=db_entry.username,
+            score=db_entry.score,
+            mode=GameMode(db_entry.mode.value),
+            date=db_entry.date
+        )
+    except Exception as e:
+        print(f"❌ Failed to save score: {e}")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=str(e))

@@ -4,18 +4,29 @@ import GameBoard from "@/components/GameBoard";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, type GameMode } from "@/services/api";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const SnakeGame: React.FC = () => {
   const { snake, food, score, gameOver, isPlaying, gameMode, start, reset, switchMode } =
     useSnakeGame("walls");
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleGameOver = async () => {
     if (user && score > 0) {
       try {
         await api.submitScore(score, gameMode, user.username);
-      } catch {
-        // silent fail for mock
+        toast({
+          title: "Score Submitted!",
+          description: `Your score of ${score} has been saved to the leaderboard.`,
+        });
+      } catch (error) {
+        console.error("Failed to submit score:", error);
+        toast({
+          title: "Submission Failed",
+          description: "Could not save your score. Please try again later.",
+          variant: "destructive",
+        });
       }
     }
   };
